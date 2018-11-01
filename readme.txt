@@ -15,7 +15,6 @@ the goal is to automatically draw a bounding box just around the stop sign (and 
     [o] diff orientations
     [x] multi-scale
 
-- works on: [stop-str-X]
 
 - sigma effect, cv2.matchTemplate
 
