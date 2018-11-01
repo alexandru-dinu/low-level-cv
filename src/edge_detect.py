@@ -1,11 +1,11 @@
 import argparse
 
 from kernels import sobel_kernels, gaussian_kernel
-from filtering import do_filtering
+from filtering import filter_image
 from utils import *
 
 
-class Orientation:
+class GradientOrientation:
 	E_W = 0
 	NE_SW = 1
 	N_S = 2
@@ -18,36 +18,32 @@ CANNY_WEAK = 100
 
 def sobel(img):
 	sx, sy = sobel_kernels()
-	gx, gy = do_filtering(img, [sx, sy], {'pad': 'symmetric'})
+	gx, gy = filter_image(img, [sx, sy], {'pad': 'symmetric'})
 
 	gx, gy = gx[:, :, 0], gy[:, :, 0]
 
 	gradient = np.hypot(gx, gy)
-	orientation = np.arctan2(gy, gx)
+	angles = np.arctan2(gy, gx)
 
-	return gradient, gx, gy, orientation
+	return gradient, gx, gy, angles
 
 
-def compute_directions(orientation):
+def compute_orientations(angles):
 	"""
-	Given the set of angles from sobel, map each angle to the direction it gives
+	Given the set of angles from sobel, map each angle to its orientation
 	"""
 
-	h, w = orientation.shape
-	deg = np.rad2deg(orientation) % 180
+	h, w = angles.shape
+	deg = np.rad2deg(angles) % 180
 
-	dirs = np.zeros((h, w), dtype=np.uint8)
+	orientations = np.zeros((h, w), dtype=np.uint8)
 
-	# E->W (horizontal gradient)
-	dirs[(deg < 22.5) | (157.5 <= deg)] = Orientation.E_W
-	# NE->SW
-	dirs[(22.5 <= deg) & (deg < 67.5)] = Orientation.NE_SW
-	# N->S (vertical gradient)
-	dirs[(67.5 <= deg) & (deg < 112.5)] = Orientation.N_S
-	# NW->SE
-	dirs[(112.5 <= deg) & (deg < 157.5)] = Orientation.NW_SE
+	orientations[(deg < 22.5) | (157.5 <= deg)] = GradientOrientation.E_W
+	orientations[(22.5 <= deg) & (deg < 67.5)] = GradientOrientation.NE_SW
+	orientations[(67.5 <= deg) & (deg < 112.5)] = GradientOrientation.N_S
+	orientations[(112.5 <= deg) & (deg < 157.5)] = GradientOrientation.NW_SE
 
-	return dirs
+	return orientations
 
 
 def thresholding(img, low_thr, high_thr):
@@ -64,8 +60,10 @@ def thresholding(img, low_thr, high_thr):
 
 def edge_tracking(img):
 	"""
-	Mark weak pixels as strong if they are connected to a strong pixel
+	Mark weak pixels as strong if they are connected
+	to at least one strong neighbouring pixel
 	"""
+
 	h, w = img.shape[:2]
 
 	for y in range(1, h - 1):
@@ -83,69 +81,72 @@ def edge_tracking(img):
 
 			strong_neighbours = map(lambda p: p == CANNY_STRONG, neighbours)
 
-			# if there is a weak pixel connected to a strong pixel,
-			# mark it as strong
 			if img[y][x] == CANNY_WEAK:
 				img[y][x] = CANNY_STRONG if any(strong_neighbours) else 0
 
 	return img
 
 
-def compute_suppressed_gradient(gradient, dirs):
+def non_max_suppression(gradient, orientations):
 	"""
-	Look for local maxima w.r.t. gradient's orientation.
+	Look for local maxima w.r.t. gradient's angles.
 	Keep only the local maxima in the resulting suppressed gradient.
 	"""
 
 	h, w = gradient.shape
-	sup_grad = np.zeros((h, w), dtype=np.float32)
+	nms_grad = np.zeros((h, w), dtype=np.float32)
 
 	for y in range(1, h - 1):
 		for x in range(1, w - 1):
-			o = dirs[y, x]
+			o = orientations[y, x]
 			g = gradient[y, x]
 
-			# horizontal gradient => check E/W
-			if o == Orientation.E_W:
+			# E->W gradient => N->S edge
+			if o == GradientOrientation.E_W:
 				if g >= gradient[y, x - 1] and g >= gradient[y, x + 1]:
-					sup_grad[y - 1, x - 1] = g
+					nms_grad[y - 1, x - 1] = g
 
-			# "second diagonal" gradient
-			elif o == Orientation.NE_SW:
+			# NE->SW gradient => NW->SE edge
+			elif o == GradientOrientation.NE_SW:
 				if g >= gradient[y - 1, x + 1] and g >= gradient[y + 1, x - 1]:
-					sup_grad[y - 1, x - 1] = g
+					nms_grad[y - 1, x - 1] = g
 
-			# vertical gradient => check N/S
-			elif o == Orientation.N_S:
+			# N->S gradient => E->W edge
+			elif o == GradientOrientation.N_S:
 				if g >= gradient[y - 1, x] and g >= gradient[y + 1, x]:
-					sup_grad[y - 1, x - 1] = g
+					nms_grad[y - 1, x - 1] = g
 
-			# "first diagonal" gradient
-			elif o == Orientation.NW_SE:
+			# NW->SE gradient -> NE->SW
+			elif o == GradientOrientation.NW_SE:
 				if g >= gradient[y - 1, x - 1] and g >= gradient[y + 1, x + 1]:
-					sup_grad[y - 1, x - 1] = g
+					nms_grad[y - 1, x - 1] = g
 
-	return sup_grad
+	return nms_grad
 
 
-def canny(img, low_thr, high_thr, sigma=0.75):
-	img_smooth = do_filtering(img, [gaussian_kernel(sigma=sigma, size=5)], {'pad': 'symmetric'})
+def canny(img, low_thr=100, high_thr=200, sigma=0.75):
+	"""
+	Perform canny edge detection
+	img -> gaussian filtering -> sobel filtering -> nms -> thresholding -> edge tracking
+	"""
 
-	gradient, gx, gy, orientation = sobel(img_smooth[0])
+	img_smooth = filter_image(img, gaussian_kernel(sigma=sigma, size=5), {'pad': 'symmetric'})
 
-	dirs = compute_directions(orientation)
+	gradient, gx, gy, angles = sobel(img)
 
-	out = compute_suppressed_gradient(gradient, dirs)
+	orientations = compute_orientations(angles)
+
+	out = non_max_suppression(gradient, orientations)
 
 	out = thresholding(out, low_thr, high_thr)
 
 	out = edge_tracking(out)
 
-	return np.expand_dims(out, axis=2)
+	return out
 
 
 def main(args):
-	img = open_img(args.img_path, args.img_mode)
+	img = open_img(args.img_path, mode='gray')
 	out = canny(img, args.low_thr, args.high_thr, args.sigma)
 
 	show_side_by_side(img, out, title2='edges')
@@ -154,7 +155,6 @@ def main(args):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--img_path', type=str)
-	parser.add_argument('--img_mode', type=str)
 	parser.add_argument('--low_thr', type=int)
 	parser.add_argument('--high_thr', type=int)
 	parser.add_argument('--sigma', type=float)

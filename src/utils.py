@@ -72,3 +72,11 @@ def show_channel(img, ch):
 		iimg[:, :, chs[c]] = np.zeros((h, w))
 
 	show_img(iimg)
+
+
+def get_channel(img, ch):
+	chs = {'r': 0, 'g': 1, 'b': 2}
+	assert ch in chs
+	assert img.ndim == 3
+
+	return np.expand_dims(img[:, :, chs[ch]], axis=2)

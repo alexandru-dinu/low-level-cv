@@ -1,16 +1,17 @@
 import argparse
+from termcolor import colored
 
 from edge_detect import canny
 from utils import *
 
 
 def generate_template(img):
-	tpl = canny(img, low_thr=180, high_thr=230, sigma=1.1)
+	tpl = canny(img, low_thr=160, high_thr=180, sigma=0.8)
 	return tpl
 
 
 def match_template(img_edges, tpl_edges):
-	scales = [0.4, 0.6, 0.8, 1.4]
+	scales = [0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8]
 	tpl_ms = [
 		cv2.resize(tpl_edges, None, fx=i, fy=i) for i in scales
 	]
@@ -33,9 +34,7 @@ def match_template(img_edges, tpl_edges):
 		top = best_loc
 		bot = (top[0] + tw, top[1] + th)
 
-	from termcolor import colored
 	print(colored(f"Detected at scale {scales[best_scale]}", 'green'))
-
 	return top, bot
 
 
@@ -45,7 +44,9 @@ def main(args):
 	tpl = open_img(args.tpl_path, 'gray')
 
 	tpl_edges = generate_template(tpl)
-	img_edges = canny(gimg, low_thr=70, high_thr=120, sigma=1.2)
+	img_edges = canny(gimg, low_thr=70, high_thr=150, sigma=1.2)
+
+	# show_side_by_side(img_edges, tpl_edges)
 
 	out = match_template(img_edges, tpl_edges)
 
@@ -60,6 +61,5 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--img_path', type=str)
 	parser.add_argument('--tpl_path', type=str)
-	# parser.add_argument('--box_size', type=int)
 
 	main(parser.parse_args())

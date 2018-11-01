@@ -4,7 +4,7 @@ from kernels import box_kernel, gaussian_kernel
 from utils import *
 
 
-def conv(pimg, kernel, pad):
+def conv(pimg, kernel, pad, normalize=False):
 	ph, pw, chs = pimg.shape
 
 	out = np.zeros((ph - 2 * pad, pw - 2 * pad, chs), dtype=np.float32)
@@ -15,7 +15,7 @@ def conv(pimg, kernel, pad):
 				patch = pimg[y - pad:y + pad + 1, x - pad:x + pad + 1, c]
 				out[y - pad, x - pad, c] = np.sum(patch * kernel)
 
-	return np.round(out).astype(np.uint8)
+	return out / 255.0 if normalize else out
 
 
 def strided_conv(img, kernel):
@@ -35,14 +35,12 @@ def strided_conv(img, kernel):
 				patch = img[y * k:(y + 1) * k, x * k:(x + 1) * k, c]
 				out[y, x, c] = np.sum(patch * kernel)
 
-	return np.round(out).astype(np.uint8)
+	return out
 
 
-def do_filtering(img, kernels, settings):
-	"""
-	settings = {'pad'}
-	"""
+def filter_image(img, kernels, settings):
 	assert settings['pad'] in ['symmetric', 'zeros']
+	normalize = settings.get('normalize', False)
 
 	if type(kernels) != list:
 		kernels = [kernels]
@@ -61,7 +59,7 @@ def do_filtering(img, kernels, settings):
 		if settings['pad'] == 'symmetric':
 			pimg = np.pad(img, pad, mode='symmetric')
 
-		out[ki] = conv(pimg, kernel, p)
+		out[ki] = conv(pimg, kernel, p, normalize)
 
 	if len(kernels) == 1:
 		out = out[0]
@@ -76,11 +74,12 @@ def main(args):
 
 	if args.filter == 'gaussian':
 		kern = gaussian_kernel(sigma=args.sigma, size=args.size)
-		out = do_filtering(img, kern, settings={'pad': 'symmetric'})
+		out = filter_image(img, kern, settings={'pad': 'symmetric', 'normalize': True})
+		print(np.min(out), np.max(out))
 
 	if args.filter == 'box':
 		kern = box_kernel(size=args.size)
-		out = do_filtering(img, kern, settings={'pad': 'symmetric'})
+		out = filter_image(img, kern, settings={'pad': 'symmetric', 'normalize': True})
 
 	# show_kernel(kern)
 	show_side_by_side(img, out)

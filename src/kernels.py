@@ -21,13 +21,13 @@ def sobel_kernels():
 		[-1, 0, 1],
 		[-2, 0, 2],
 		[-1, 0, 1]
-	])
+	], dtype=np.float32)
 
 	sy = np.array([
 		[1, 2, 1],
 		[0, 0, 0],
 		[-1, -2, -1]
-	])
+	], dtype=np.float32)
 
 	return sx, sy
 
@@ -37,26 +37,24 @@ def stop_sign_kernels():
 		[-1, 0, 1],
 		[-2, 0, 2],
 		[-1, 0, 1]
-	])
+	], dtype=np.float32)
 
 	sy = np.array([
 		[1, 2, 1],
 		[0, 0, 0],
 		[-1, -2, -1]
-	])
+	], dtype=np.float32)
 
 	sd1 = np.array([
 		[0, -2, 0],
 		[-2, 0, 2],
 		[0, 2, 0]
-	])
+	], dtype=np.float32)
 
 	sd2 = np.array([
 		[0, 2, 0],
 		[2, 0, -2],
 		[0, -2, 0]
-	])
+	], dtype=np.float32)
 
 	return sx, sy, sd1, sd2
-
-
