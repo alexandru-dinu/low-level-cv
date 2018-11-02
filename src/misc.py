@@ -22,8 +22,9 @@ def hsv_red_contours(args):
     mask = (mask1 | mask2)# / 255
     assert mask[mask == 255].size + mask[mask == 0].size == mask.size
 
-    out = median_filtering(np.expand_dims(mask, axis=2), args.size)
-    out = out[:, :, 0].astype(np.uint8)
+    # out = median_filtering(np.expand_dims(mask, axis=2), args.size)
+    # out = out[:, :, 0].astype(np.uint8)
+    out = cv2.medianBlur(mask, args.size)
     _, contours, _ = cv2.findContours(out, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 
