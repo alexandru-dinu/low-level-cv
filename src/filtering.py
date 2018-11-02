@@ -38,6 +38,25 @@ def strided_conv(img, kernel):
 	return out
 
 
+def median_filtering(img, size, normalize=False):
+	k = size
+	p = (k - 1) // 2  # pad size
+	pad = ((p, p), (p, p), (0, 0))  # h, w, c
+	pimg = np.pad(img, pad, mode='symmetric')
+
+	ph, pw, chs = pimg.shape
+
+	out = np.zeros((ph - 2 * p, pw - 2 * p, chs), dtype=np.float32)
+
+	for c in range(chs):
+		for y in range(p, ph - p):
+			for x in range(p, pw - p):
+				patch = pimg[y - p:y + p + 1, x - p:x + p + 1, c]
+				out[y - p, x - p, c] = np.median(patch)
+
+	return out / 255.0 if normalize else out
+
+
 def filter_image(img, kernels, settings):
 	assert settings['pad'] in ['symmetric', 'zeros']
 	normalize = settings.get('normalize', False)
