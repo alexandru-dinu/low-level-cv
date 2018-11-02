@@ -132,7 +132,7 @@ def canny(img, low_thr=100, high_thr=200, sigma=0.75):
 
 	img_smooth = filter_image(img, gaussian_kernel(sigma=sigma, size=5), {'pad': 'symmetric'})
 
-	gradient, gx, gy, angles = sobel(img)
+	gradient, gx, gy, angles = sobel(img_smooth)
 
 	orientations = compute_orientations(angles)
 
