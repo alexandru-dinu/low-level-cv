@@ -40,7 +40,7 @@ def hsv_red_contours(args):
 	# areas = sorted(areas, key=itemgetter(1))
 	# bbox = bboxes[np.argmax(areas)
 
-	print(len(bboxes), len(areas))
+	print(colored(f"Detected: {len(areas)}", "green"))
 
 	for (bbox, _) in areas:
 		tl, br = (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])
