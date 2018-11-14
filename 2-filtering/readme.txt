@@ -1,6 +1,6 @@
 [x] create a gaussian / box filter
 [x] filter the image with a given filter.
-[ ] test these filters at different sizes and analyze their effects on the stop sign image.
+[x] test these filters at different sizes and analyze their effects on the stop sign image.
     - show output with gaussian, varying size and sigma
     - show output with box, varying size
 

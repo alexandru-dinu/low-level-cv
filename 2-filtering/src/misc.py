@@ -20,7 +20,7 @@ def hsv_red_contours(args):
 		hsv, np.array([170, 110, 100]), np.array([180, 255, 255])
 	)
 
-	mask = (mask1 | mask2)  # / 255
+	mask = (mask1 | mask2)  #
 	assert mask[mask == 255].size + mask[mask == 0].size == mask.size
 
 	# out = median_filtering(np.expand_dims(mask, axis=2), args.size)
