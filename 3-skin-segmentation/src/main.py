@@ -49,12 +49,17 @@ def process_single(args):
 
 	assert mask[mask == 255].size + mask[mask == 0].size == mask.size
 
-	strel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+	strel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
-	mask = cv2.medianBlur(mask, ksize=5)
-	mask = cv2.erode(mask, strel, iterations=3)
-	mask = cv2.dilate(mask, strel, iterations=6)
-	mask = cv2.medianBlur(mask, ksize=11)
+	# mask = cv2.medianBlur(mask, ksize=7)
+	mask = cv2.erode(mask, strel, iterations=2)
+	# mask = cv2.medianBlur(mask, ksize=11)
+	# mask = cv2.erode(mask, strel, iterations=3)
+	mask = cv2.dilate(mask, strel, iterations=3)
+	# mask = cv2.erode(mask, strel, iterations=3)
+	# mask = cv2.dilate(mask, strel, iterations=20)
+	# mask = cv2.erode(mask, strel, iterations=5)
+	# mask = cv2.medianBlur(mask, ksize=11)
 
 	plt.imshow(np.vstack((gray, mask)), cmap='gray')
 	# plt.imshow(mask, cmap='gray')

@@ -4,6 +4,7 @@ from random import shuffle
 import argparse
 import numpy as np
 
+
 def download_images(count=10):
 	data = [json.loads(x.strip()) for x in open("../data/face_detection.json")]
 	shuffle(data)
@@ -36,8 +37,8 @@ def morph_operation(img, mode, strel, num_iter=1):
 
 		for y in range(p, h + p):
 			for x in range(p, w + p):
-				patch = pimg[y-p:y+p+1, x-p:x+p+1]
-				out[y-p, x-p] = func[mode](patch * strel)
+				patch = pimg[y - p:y + p + 1, x - p:x + p + 1]
+				out[y - p, x - p] = func[mode](patch * strel)
 
 		pimg = np.pad(out.copy(), pad, mode='constant', constant_values=pad_value)
 
@@ -46,7 +47,9 @@ def morph_operation(img, mode, strel, num_iter=1):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--num', required=True, type=int)
+	parser.add_argument('--download', action='store_true')
+	parser.add_argument('--num', type=int)
 	args = parser.parse_args()
 
-	download_images(args.num)
+	if args.download:
+		download_images(args.num)
