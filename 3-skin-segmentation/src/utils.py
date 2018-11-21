@@ -45,6 +45,32 @@ def morph_operation(img, mode, strel, num_iter=1):
 	return out
 
 
+def get_ellipse(xs, f=np.sqrt(2)):
+	"""
+	xs (blob) -> fitting ellipse
+	"""
+	assert xs.ndim == 2 and xs.shape[1] == 2
+	N = xs.shape[0]
+	mean = xs.mean(axis=0)
+
+	xp = np.matrix(xs - mean)
+	cov = (1 / (N - 1)) * xp.T * xp
+	eig_values, eig_vectors = np.linalg.eig(cov)
+	eig_vectors += mean
+
+	eig_vectors[:, 0] *= np.sqrt(eig_values[0]) * f
+	eig_vectors[:, 1] *= np.sqrt(eig_values[1]) * f
+
+	v1, v2 = eig_vectors[:, 0], eig_vectors[:, 1]
+
+	t = np.linspace(0, 2 * np.pi, num=N, endpoint=False)
+	ellipse = np.zeros_like(xs)
+	ellipse[:, 0] = v1[0] * np.cos(t) + v2[0] * np.sin(t)
+	ellipse[:, 1] = v1[1] * np.cos(t) + v2[1] * np.sin(t)
+
+	return ellipse
+
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--download', action='store_true')

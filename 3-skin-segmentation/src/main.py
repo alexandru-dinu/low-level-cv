@@ -86,13 +86,7 @@ def ellipse_fitting(img, blobs):
 		if 1 <= l1/l2 <= 2
 			fit & draw ellipse
 	"""
-
-	for x in blobs:
-		xp = np.matrix(x - x.mean(axis=0))
-		s = (1 / (len(xp) - 1)) * xp.T * xp
-		evalues, evectors = np.linalg.eig(s)
-		m_evalues = evalues + x.mean(axis=0)
-		return m_evalues
+	pass
 
 
 def process_single(args):
