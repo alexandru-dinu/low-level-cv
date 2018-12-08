@@ -1,8 +1,11 @@
+import argparse
 import json
 import urllib.request as req
 from random import shuffle
-import argparse
+
 import numpy as np
+import cv2
+import matplotlib.pyplot as plt
 
 
 def download_images(count=10):
@@ -31,6 +34,8 @@ def morph_operation(img, mode, strel, num_iter=1):
 	p = (k - 1) // 2
 	pad = ((p, p), (p, p))
 	pimg = np.pad(img, pad, mode='constant', constant_values=pad_value)
+
+	out = None
 
 	for i in range(num_iter):
 		out = np.zeros((h, w), dtype=img.dtype)
@@ -63,12 +68,38 @@ def get_ellipse(xs, f=np.sqrt(2)):
 
 	v1, v2 = eig_vectors[:, 0], eig_vectors[:, 1]
 
+	print(v1, v2)
+
 	t = np.linspace(0, 2 * np.pi, num=N, endpoint=False)
 	ellipse = np.zeros_like(xs)
 	ellipse[:, 0] = v1[0] * np.cos(t) + v2[0] * np.sin(t)
 	ellipse[:, 1] = v1[1] * np.cos(t) + v2[1] * np.sin(t)
 
 	return ellipse
+
+
+def show_histogram(img, lthr=5, hthr=30, bin_count=50):
+	hue, sat, val = cv2.split(img)
+
+	roi = np.where((lthr <= hue) & (hue <= hthr))
+	hue = hue[roi]
+	sat = sat[roi]
+	val = val[roi]
+
+	plt.subplot(1, 3, 1)
+	n, bins, patches = plt.hist(hue, bin_count)
+	plt.title("Hue")
+
+	plt.subplot(1, 3, 2)
+	n, bins, patches = plt.hist(sat, bin_count)
+	plt.title("Sat")
+
+	plt.subplot(1, 3, 3)
+	n, bins, patches = plt.hist(val, bin_count)
+	plt.title("Val")
+
+	plt.tight_layout()
+	plt.show()
 
 
 if __name__ == '__main__':

@@ -10,8 +10,8 @@ rs = np.random.RandomState(12345)
 
 a = 2
 b = 7
-N = 100
-t = np.linspace(0, 1, N, endpoint=False)
+N = 200
+t = np.linspace(0, 1, N, endpoint=True)
 
 rotation_matrix = lambda x: np.array([[np.cos(x), -np.sin(x)], [np.sin(x), np.cos(x)]])
 
