@@ -8,27 +8,51 @@ np.set_printoptions(suppress=True, precision=4)
 
 rs = np.random.RandomState(12345)
 
-a = 2
-b = 7
-N = 200
+h, w = 500, 500
+img = np.zeros((h, w), dtype=np.uint8)
+
+a = 50
+b = 150
+N = 500
 t = np.linspace(0, 1, N, endpoint=True)
 
 rotation_matrix = lambda x: np.array([[np.cos(x), -np.sin(x)], [np.sin(x), np.cos(x)]])
 
-X = np.c_[a * np.cos(2 * np.pi * t), b * np.sin(2 * np.pi * t)]
-X = X + rs.randn(N, 2) * 0.66
+X = np.vstack((
+	np.c_[a * np.cos(2 * np.pi * t), b * np.sin(2 * np.pi * t)],
+	np.c_[48 * np.cos(2 * np.pi * t), 147 * np.sin(2 * np.pi * t)],
+	np.c_[38 * np.cos(2 * np.pi * t), 137 * np.sin(2 * np.pi * t)],
+	np.c_[28 * np.cos(2 * np.pi * t), 127 * np.sin(2 * np.pi * t)],
+))
+
+N *= 4
+
+X = X + rs.randn(N, 2) * 2.7
 X = np.dot(rotation_matrix(np.deg2rad(37.5)), X.T).T
+X = np.round(X + np.array([-X[:, 0].min(), -X[:, 1].min()]))
 
-ellipse = get_ellipse(X)
+assert X.min() >= 0 and X.max() >= 0
 
-plt.plot(X[:, 0], X[:, 1], 'ob', lw=1)
-plt.plot(ellipse[:, 0], ellipse[:, 1], '-r', lw=1)
-# plt.tight_layout()
-plt.grid()
+xs = []
+
+for px, py in X:
+	px, py = int(px), int(py)
+	xs.append((px+150, py+123))
+xs = np.array(xs)
+
+for px, py in xs:
+	img[px, py] = 255
+
+ellipse = get_ellipse(xs)
+
+ellipse2 = cv2.fitEllipse(xs)
+cv2.ellipse(img, ellipse2, 255, 2)
+
+plt.imshow(img, cmap='gray')
 plt.show()
-exit(1)
+exit(0)
 
-
+exit(0)
 # # Fit the ellipse.
 # u, s, vt = np.linalg.svd((X - X.mean(axis=0)) / np.sqrt(N), full_matrices=False)
 # print(s)

@@ -20,6 +20,19 @@ def download_images(count=10):
 		print(f"Downloaded ../data/img_{i}.jpg")
 
 
+def show(arr, from_cv2=False, cmap=None):
+	if from_cv2:
+		b = arr[:, :, 0]
+		g = arr[:, :, 1]
+		r = arr[:, :, 2]
+		arr = np.dstack((r, g, b))
+
+	plt.imshow(arr, cmap=cmap)
+	plt.tight_layout()
+
+	plt.show()
+
+
 def morph_operation(img, mode, strel, num_iter=1):
 	func = {'erode': np.min, 'dilate': np.max}
 	assert mode in func.keys(), "Invalid mode"
@@ -67,8 +80,6 @@ def get_ellipse(xs, f=np.sqrt(2)):
 	eig_vectors[:, 1] *= np.sqrt(eig_values[1]) * f
 
 	v1, v2 = eig_vectors[:, 0], eig_vectors[:, 1]
-
-	print(v1, v2)
 
 	t = np.linspace(0, 2 * np.pi, num=N, endpoint=False)
 	ellipse = np.zeros_like(xs)
