@@ -122,8 +122,17 @@ def process_single(args):
 	# 	cv2.rectangle(xx, tl, br, 255, 2)
 
 	# fit ellipses
-	for blob in blobs:
+	for blob, rect in zip(blobs, rects):
 		ellipse = cv2.fitEllipse(blob)
+
+		area = cv2.contourArea(blob)
+		perim = cv2.arcLength(blob, closed=True)
+		x = (np.pi * 4 * area) / (perim ** 2)
+
+		# if x > 0.51:
+		# 	print(f"Rejecting blob with x = {x}")
+		# 	continue
+
 		cv2.ellipse(img, ellipse, (0, 255, 0), 2)
 
 	show(filtered, cmap='gray')

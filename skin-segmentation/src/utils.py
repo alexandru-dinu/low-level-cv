@@ -6,6 +6,7 @@ from random import shuffle
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from PIL import ImageDraw
 
 
 def download_images(count=10):
@@ -35,6 +36,7 @@ def show(arr, from_cv2=False, cmap=None):
 
 def morph_operation(img, mode, strel, num_iter=1):
 	func = {'erode': np.min, 'dilate': np.max}
+
 	assert mode in func.keys(), "Invalid mode"
 	assert img.ndim == 2, "Only 2D binary image"
 	assert strel.ndim == 2, "Only 2D strel"
@@ -55,12 +57,24 @@ def morph_operation(img, mode, strel, num_iter=1):
 
 		for y in range(p, h + p):
 			for x in range(p, w + p):
-				patch = pimg[y - p:y + p + 1, x - p:x + p + 1]
-				out[y - p, x - p] = func[mode](patch * strel)
+				patch = np.ma.array(pimg[y - p:y + p + 1, x - p:x + p + 1], mask=1 - strel)
+
+				out[y - p, x - p] = func[mode](patch)
 
 		pimg = np.pad(out.copy(), pad, mode='constant', constant_values=pad_value)
 
 	return out
+
+
+def unit_vector(vector):
+	return vector / np.linalg.norm(vector)
+
+
+def angle_between(v1, v2):
+	v1_u = unit_vector(v1)
+	v2_u = unit_vector(v2)
+
+	return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 
 def get_ellipse(xs, f=np.sqrt(2)):
@@ -74,19 +88,18 @@ def get_ellipse(xs, f=np.sqrt(2)):
 	xp = np.matrix(xs - mean)
 	cov = (1 / (N - 1)) * xp.T * xp
 	eig_values, eig_vectors = np.linalg.eig(cov)
-	eig_vectors += mean
 
 	eig_vectors[:, 0] *= np.sqrt(eig_values[0]) * f
 	eig_vectors[:, 1] *= np.sqrt(eig_values[1]) * f
+	eig_vectors += mean
 
-	v1, v2 = eig_vectors[:, 0], eig_vectors[:, 1]
+	v1 = np.array([eig_vectors[0, 0], eig_vectors[1, 0]])
+	v2 = np.array([eig_vectors[0, 1], eig_vectors[1, 1]])
 
-	t = np.linspace(0, 2 * np.pi, num=N, endpoint=False)
-	ellipse = np.zeros_like(xs)
-	ellipse[:, 0] = v1[0] * np.cos(t) + v2[0] * np.sin(t)
-	ellipse[:, 1] = v1[1] * np.cos(t) + v2[1] * np.sin(t)
+	print(np.rad2deg(angle_between(v1, v2)))
 
-	return ellipse
+	# return v1, v2
+	pass
 
 
 def show_histogram(img, lthr=5, hthr=30, bin_count=50):

@@ -1,7 +1,7 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import imutils
 import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+
 from utils import get_ellipse
 
 np.set_printoptions(suppress=True, precision=4)

@@ -2,7 +2,7 @@
 
 case "$1" in
     "img_1")
-        python main.py --img_path ../data/img_1.jpg --low_thr 5 30 150 --high_thr 20 150 255 --blob_thr 5000
+        python main.py --img_path ../data/img_1.jpg --low_thr 5 70 150 --high_thr 20 150 255 --blob_thr 5000
         ;;
     "img_2")
         python main.py --img_path ../data/img_2.jpg --low_thr 5 50 150 --high_thr 20 110 255 --blob_thr 5000
