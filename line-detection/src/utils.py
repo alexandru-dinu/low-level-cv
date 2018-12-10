@@ -3,6 +3,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def get_edges(img):
+	out = img.copy()
+
+	out = cv2.GaussianBlur(out, ksize=(3, 3), sigmaX=0)
+	out = cv2.Canny(out, 100, 230)
+
+	return out
+
+
+def morphological(img):
+	out = img.copy()
+
+	strel = cv2.getStructuringElement(shape=cv2.MORPH_RECT, ksize=(7, 7))
+
+	out = cv2.dilate(out, strel, iterations=1)
+	out = cv2.erode(out, strel, iterations=1)
+
+	return out
+
+
 def open_img(img_path, gray=False):
 	if gray:
 		img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)

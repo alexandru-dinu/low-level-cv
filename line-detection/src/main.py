@@ -1,42 +1,32 @@
 import argparse
 
-import cv2
-
-from utils import open_img, show
-
-
-def get_edges(img):
-	out = img.copy()
-
-	out = cv2.GaussianBlur(out, ksize=(3, 3), sigmaX=0)
-	out = cv2.Canny(out, 200, 230)
-
-	return out
-
-
-def morphological(img):
-	out = img.copy()
-
-	strel = cv2.getStructuringElement(shape=cv2.MORPH_RECT, ksize=(7, 7))
-
-	out = cv2.dilate(out, strel, iterations=1)
-	out = cv2.erode(out, strel, iterations=1)
-
-	return out
+from utils import *
+from ransac import find_sequential
 
 
 def main(args):
 	img = open_img(args.img_path)
 	gray = open_img(args.img_path, gray=True)
 
-	# show(img, from_cv2=True)
+	edge_img = get_edges(gray)
+	edge_img = np.divide(edge_img, 255).astype(np.uint8)
 
-	out = get_edges(gray)
-	out = morphological(out)
+	# show(edge_img, cmap='gray')
 
-	show(out, cmap='gray')
+	config = {
+		'num_lines': 12,
+		'sample_size': 10,
+		'num_iter': 2000,
+		'inlier_thr': 10
+	}
+	model_vecs, models = find_sequential(edge_img, config)
 
-	pass
+	for m in models:
+		x1, x2 = 0, 200
+		y1, y2 = int(m(x1)), int(m(x2))
+		cv2.line(img, (y1, x1), (y2, x2), (0, 255, 0), thickness=2)
+
+	show(img, from_cv2=True)
 
 
 if __name__ == '__main__':
