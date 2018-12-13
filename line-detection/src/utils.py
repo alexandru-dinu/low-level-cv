@@ -7,12 +7,12 @@ def get_edges(img):
 	out = img.copy()
 
 	out = cv2.GaussianBlur(out, ksize=(3, 3), sigmaX=0)
-	out = cv2.Canny(out, 100, 230)
+	out = cv2.Canny(out, 170, 230)
 
 	return out
 
 
-def morphological(img):
+def morph_close(img):
 	out = img.copy()
 
 	strel = cv2.getStructuringElement(shape=cv2.MORPH_RECT, ksize=(7, 7))
