@@ -77,7 +77,13 @@ def angle_between(v1, v2):
 	return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
 
-def get_ellipse(xs, f=np.sqrt(2)):
+def eig_sorted(mat):
+	eig_vals, eig_vecs = np.linalg.eig(mat)
+	idx = np.argsort(eig_vals)[::-1]
+	return eig_vals[idx], eig_vecs[:, idx]
+
+
+def get_ellipse(xs, sf=np.sqrt(2)):
 	"""
 	xs (blob) -> fitting ellipse
 	"""
@@ -87,19 +93,21 @@ def get_ellipse(xs, f=np.sqrt(2)):
 
 	xp = np.matrix(xs - mean)
 	cov = (1 / (N - 1)) * xp.T * xp
-	eig_values, eig_vectors = np.linalg.eig(cov)
+	eig_values, eig_vectors = eig_sorted(cov)
 
-	eig_vectors[:, 0] *= np.sqrt(eig_values[0]) * f
-	eig_vectors[:, 1] *= np.sqrt(eig_values[1]) * f
+	a = np.rad2deg(np.arccos(np.clip(eig_vectors[0, 1], -1.0, 1.0)))
+
+	eig_vectors[:, 0] *= np.sqrt(eig_values[0]) * sf
+	eig_vectors[:, 1] *= np.sqrt(eig_values[1]) * sf
 	eig_vectors += mean
 
 	v1 = np.array([eig_vectors[0, 0], eig_vectors[1, 0]])
 	v2 = np.array([eig_vectors[0, 1], eig_vectors[1, 1]])
 
-	print(np.rad2deg(angle_between(v1, v2)))
+	(cx, cy) = mean
+	(MA, ma) = np.sqrt(eig_values) * sf
 
-	# return v1, v2
-	pass
+	return (cx, cy), (ma, MA), a
 
 
 def show_histogram(img, lthr=5, hthr=30, bin_count=50):
