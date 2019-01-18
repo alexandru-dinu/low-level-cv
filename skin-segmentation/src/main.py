@@ -8,11 +8,6 @@ from utils import show_histogram, get_ellipse, show
 np.set_printoptions(threshold=np.nan, linewidth=240)
 
 
-def determine_hsv_ranges(histogram):
-	# TODO
-	pass
-
-
 def hsv_thresholding(hsv, low_thr, high_thr):
 	"""
 	HSV -> Binary image
