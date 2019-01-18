@@ -123,8 +123,8 @@ def process_single(args):
 
 	# fit ellipses
 	for blob, rect in zip(blobs, rects):
-		ellipse = cv2.fitEllipse(blob)
-		print(ellipse)
+		# ellipse = cv2.fitEllipse(blob)
+		# print(ellipse)
 
 		ellipse = get_ellipse(blob, 4)
 		print(ellipse)
