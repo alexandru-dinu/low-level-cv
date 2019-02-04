@@ -1,2 +1,1 @@
-# cv-assignments
-Coding assignments for Computer Vision class.
+# Low-level Computer Vision
