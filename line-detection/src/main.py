@@ -15,12 +15,7 @@ def main(args):
 
     # show(edge_img, cmap='gray')
 
-    config = {
-        'num_lines': 3,
-        'sample_size': 80,
-        'num_iter': 2000,
-        'inlier_thr': 50
-    }
+    config = {"num_lines": 3, "sample_size": 80, "num_iter": 2000, "inlier_thr": 50}
     model_vecs, models = find_sequential(edge_img, config)
 
     for m in models:
@@ -31,7 +26,7 @@ def main(args):
     show(img, from_cv2=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--img_path', required=True, type=str)
+    parser.add_argument("--img_path", required=True, type=str)
     main(parser.parse_args())

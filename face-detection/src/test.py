@@ -18,12 +18,14 @@ t = np.linspace(0, 1, N, endpoint=True)
 
 rotation_matrix = lambda x: np.array([[np.cos(x), -np.sin(x)], [np.sin(x), np.cos(x)]])
 
-X = np.vstack((
-	np.c_[a * np.cos(2 * np.pi * t), b * np.sin(2 * np.pi * t)],
-	np.c_[48 * np.cos(2 * np.pi * t), 147 * np.sin(2 * np.pi * t)],
-	np.c_[38 * np.cos(2 * np.pi * t), 137 * np.sin(2 * np.pi * t)],
-	np.c_[28 * np.cos(2 * np.pi * t), 127 * np.sin(2 * np.pi * t)],
-))
+X = np.vstack(
+    (
+        np.c_[a * np.cos(2 * np.pi * t), b * np.sin(2 * np.pi * t)],
+        np.c_[48 * np.cos(2 * np.pi * t), 147 * np.sin(2 * np.pi * t)],
+        np.c_[38 * np.cos(2 * np.pi * t), 137 * np.sin(2 * np.pi * t)],
+        np.c_[28 * np.cos(2 * np.pi * t), 127 * np.sin(2 * np.pi * t)],
+    )
+)
 
 N *= 4
 
@@ -36,19 +38,19 @@ assert X.min() >= 0 and X.max() >= 0
 xs = []
 
 for px, py in X:
-	px, py = int(px), int(py)
-	xs.append((px+150, py+123))
+    px, py = int(px), int(py)
+    xs.append((px + 150, py + 123))
 xs = np.array(xs)
 
 for px, py in xs:
-	img[px, py] = 255
+    img[px, py] = 255
 
 ellipse = get_ellipse(xs)
 
 ellipse2 = cv2.fitEllipse(xs)
 cv2.ellipse(img, ellipse2, 255, 2)
 
-plt.imshow(img, cmap='gray')
+plt.imshow(img, cmap="gray")
 plt.show()
 exit(0)
 

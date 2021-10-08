@@ -24,8 +24,7 @@ def dist(model, x, y):
 
 
 def ransac(data, sample_size=10, num_iter=100, inlier_thr=10, target_inliers=None):
-    """
-    """
+    """ """
 
     x, y = np.where(data == 1)
     z = list(zip(x, y))
@@ -43,7 +42,9 @@ def ransac(data, sample_size=10, num_iter=100, inlier_thr=10, target_inliers=Non
         model_vec, model = fit_lsq(sx, sy)
         # print(f"[{it}] -> {model_vec.T}")
 
-        inliers = [(px, py) for (px, py) in zip(x, y) if dist(model, px, py) <= inlier_thr]
+        inliers = [
+            (px, py) for (px, py) in zip(x, y) if dist(model, px, py) <= inlier_thr
+        ]
 
         if len(inliers) > best_inlier_count:
             best_inlier_count = len(inliers)
@@ -51,8 +52,7 @@ def ransac(data, sample_size=10, num_iter=100, inlier_thr=10, target_inliers=Non
             best_inliers = inliers[:]
 
             best_model = fit_lsq(
-                x=np.array([e[0] for e in inliers]),
-                y=np.array([e[1] for e in inliers])
+                x=np.array([e[0] for e in inliers]), y=np.array([e[1] for e in inliers])
             )
 
             if target_inliers is not None and len(inliers) > target_inliers:
@@ -79,8 +79,10 @@ def find_sequential(data, config):
     models = []
     model_vecs = []
 
-    for line in range(config['num_lines']):
-        (model_vec, model), inliers = ransac(cdata, config['sample_size'], config['num_iter'], config['inlier_thr'])
+    for line in range(config["num_lines"]):
+        (model_vec, model), inliers = ransac(
+            cdata, config["sample_size"], config["num_iter"], config["inlier_thr"]
+        )
 
         cdata = strip_inliers(cdata, inliers)
         # show(cdata, cmap='gray')

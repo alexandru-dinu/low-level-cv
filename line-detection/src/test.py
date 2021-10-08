@@ -33,7 +33,7 @@ def generate(y, num_inliers=200, num_outliers=25):
     return xs
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     data1 = generate(y=lambda x: 1 * x + 20, num_inliers=100, num_outliers=50)
     data2 = generate(y=lambda x: 2 * x - 33, num_inliers=100, num_outliers=50)
     data3 = generate(y=lambda x: 3 * x + 43, num_inliers=100, num_outliers=50)
@@ -44,12 +44,7 @@ if __name__ == '__main__':
     # (model_vec, model), _ = ransac(data, sample_size=20, num_iter=2000, inlier_thr=10)
     # print(colored(f"Best model: {model_vec.T}", "green"))
 
-    config = {
-        'num_lines': 4,
-        'sample_size': 5,
-        'num_iter': 2000,
-        'inlier_thr': 20
-    }
+    config = {"num_lines": 4, "sample_size": 5, "num_iter": 2000, "inlier_thr": 20}
     model_vecs, models = find_sequential(data, config)
 
     img = data.copy()
@@ -59,7 +54,7 @@ if __name__ == '__main__':
         y1, y2 = int(m(x1)), int(m(x2))
         cv2.line(img, (y1, x1), (y2, x2), 1, thickness=1)
 
-    plt.imshow(img, cmap='gray')
+    plt.imshow(img, cmap="gray")
     plt.tight_layout()
     plt.show()
 
